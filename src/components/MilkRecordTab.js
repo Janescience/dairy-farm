@@ -4,7 +4,6 @@ import Avatar from './Avatar'
 import Button from './Button'
 
 export default function MilkRecordTab({
-  selectedFarmId,
   selectedSession,
   cows,
   availableCows,
@@ -35,44 +34,29 @@ export default function MilkRecordTab({
           const avgMilk = totalMilk / records.length
 
           return (
-            <div className="bg-white/90 backdrop-blur-xl rounded-3xl border-0 shadow-[0_8px_32px_rgba(0,0,0,0.08)] mb-6 overflow-hidden">
-              <div className="p-6 bg-gradient-to-r from-blue-50/30 via-white/50 to-green-50/30">
-                <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+            <div className="bg-white/90 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sticky top-0 z-20 mx-[-16px] mb-6">
+              <div className="px-4 py-4 bg-gradient-to-r from-blue-50/30 via-white/50 to-green-50/30">
+                <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Sun size={18} className="text-white" />
-                      </div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md mx-auto mb-2">
+                      <Sun size={16} className="text-white" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{morningMilk.toFixed(2)}</div>
-                    <div className="text-sm font-medium text-gray-600">เช้า • {morningRecords.length} ตัว</div>
+                    <div className="text-xl font-bold text-gray-900 mb-1">{morningMilk.toFixed(2)}</div>
+                    <div className="text-xs text-gray-600">เช้า • {morningRecords.length} ตัว</div>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Moon size={18} className="text-white" />
-                      </div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-md mx-auto mb-2">
+                      <Moon size={16} className="text-white" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{eveningMilk.toFixed(2)}</div>
-                    <div className="text-sm font-medium text-gray-600">เย็น • {eveningRecords.length} ตัว</div>
+                    <div className="text-xl font-bold text-gray-900 mb-1">{eveningMilk.toFixed(2)}</div>
+                    <div className="text-xs text-gray-600">เย็น • {eveningRecords.length} ตัว</div>
                   </div>
                   <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Calculator size={18} className="text-white" />
-                      </div>
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md mx-auto mb-2">
+                      <BarChart3 size={16} className="text-white" />
                     </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{avgMilk.toFixed(2)}</div>
-                    <div className="text-sm font-medium text-gray-600">เฉลี่ย</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="flex items-center justify-center mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <BarChart3 size={18} className="text-white" />
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{totalMilk.toFixed(2)}</div>
-                    <div className="text-sm font-medium text-gray-600">รวมทั้งวัน</div>
+                    <div className="text-xl font-bold text-gray-900 mb-1">{totalMilk.toFixed(2)}</div>
+                    <div className="text-xs text-gray-600">รวมทั้งวัน</div>
                   </div>
                 </div>
               </div>
@@ -89,7 +73,7 @@ export default function MilkRecordTab({
       )}
 
       {/* No cows message */}
-      {selectedFarmId && cows.length === 0 && (
+      {cows.length === 0 && (
         <div className="bg-white/80 backdrop-blur-sm border border-gray-200/50 text-gray-500 px-3 py-2 rounded-lg mb-4 shadow-sm">
           <p className="text-lg font-thin">ยังไม่มีโคในฟาร์มนี้ กรุณาไปเพิ่มโคในหน้าตั้งค่าก่อน</p>
         </div>
@@ -116,37 +100,37 @@ export default function MilkRecordTab({
                 style={{ position: 'relative', zIndex: 1 }}
               >
                   {/* Modern Glass Card */}
-                  <div className="bg-white/90 backdrop-blur-xl p-4 rounded-3xl border-0 shadow-[0_8px_32px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_48px_rgba(0,0,0,0.12)] transition-all duration-500 cursor-pointer group-hover:scale-[1.02] group-hover:bg-white">
+                  <div className="bg-white/90 backdrop-blur-xl p-3 rounded-2xl border-0 shadow-[0_4px_24px_rgba(0,0,0,0.06)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)] transition-all duration-300 cursor-pointer group-hover:scale-[1.01] group-hover:bg-white">
 
                     {/* Subtle gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-green-50/30 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-green-50/30 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                     {/* Content */}
                     <div className="relative z-10">
                       <div className="flex items-center justify-between">
                         {/* Left: Avatar + Info */}
-                        <div className="flex items-center space-x-3">
+                        <div className="flex items-center space-x-2">
                           <div className="relative">
-                            <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-green-100 rounded-2xl shadow-lg flex items-center justify-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-green-100 rounded-xl shadow-md flex items-center justify-center">
                               <Avatar
                                 username={record.cowId.name}
-                                size={40}
-                                className="rounded-xl"
+                                size={32}
+                                className="rounded-lg"
                               />
                             </div>
                             {/* Ranking indicator */}
-                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-blue-500 to-purple-600 border-2 border-white rounded-full shadow-lg flex items-center justify-center">
-                              <span className="text-xs font-bold text-white">{index + 1}</span>
+                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-r from-blue-500 to-purple-600 border-2 border-white rounded-full shadow-md flex items-center justify-center">
+                              <span className="text-[10px] font-bold text-white">{index + 1}</span>
                             </div>
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center space-x-2 mb-1">
-                              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 truncate">
+                            <div className="flex items-center space-x-1 mb-0.5">
+                              <h3 className="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300 truncate">
                                 {record.cowId.name}
                               </h3>
                               {/* Session badge */}
-                              <div className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                              <div className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
                                 selectedSession === 'morning'
                                   ? 'bg-amber-100 text-amber-700'
                                   : 'bg-blue-100 text-blue-700'
@@ -159,18 +143,18 @@ export default function MilkRecordTab({
                         </div>
 
                         {/* Right: Amount */}
-                        <div className="text-right flex-shrink-0 ml-4">
+                        <div className="text-right flex-shrink-0 ml-3">
                           <div className="flex items-baseline space-x-1">
-                            <span className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                            <span className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
                               {record.milkAmount.toFixed(2)}
                             </span>
-                            <span className="text-sm font-medium text-gray-500">กก.</span>
+                            <span className="text-xs font-medium text-gray-500">กก.</span>
                           </div>
                         </div>
                       </div>
 
                       {/* Progress bar visualization */}
-                      <div className="mt-3 mb-1">
+                      <div className="mt-2 mb-1">
                         {(() => {
                           const target = selectedSession === 'morning' ? 30 : 20
                           const percentage = (record.milkAmount / target) * 100

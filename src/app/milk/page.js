@@ -1,44 +1,35 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Milk, Settings, Sun, Moon, Clock, Droplets, History , Calendar } from 'lucide-react'
-import { useFarms } from '../../hooks/useFarms'
+import { Milk, Settings, Sun, Moon, Clock, Calendar } from 'lucide-react'
 import { useCows } from '../../hooks/useCows'
 import { useMilkRecords } from '../../hooks/useMilkRecords'
-import { formatThaiDate, getCurrentSession, getTodayThailand } from '../../lib/datetime'
+import { getCurrentSession, getTodayThailand } from '../../lib/datetime'
 import MilkRecordTab from '../../components/MilkRecordTab'
-import MilkHistoryTab from '../../components/MilkHistoryTab'
+import CalendarView from '../../components/CalendarView'
+import MilkHistoryModal from '../../components/MilkHistoryModal'
 import BackdateModal from '../../components/BackdateModal'
 import BottomNavigation from '../../components/BottomNavigation'
 import Button from '../../components/Button'
-import Avatar from '../../components/Avatar'
+import AuthGuard from '../../components/AuthGuard'
 
 export default function MilkPage() {
-  const [activeTab, setActiveTab] = useState('record') // 'record' or 'history'
   const [selectedSession, setSelectedSession] = useState(() => getCurrentSession())
-  const [selectedFarmId, setSelectedFarmId] = useState(null)
   const [newRecord, setNewRecord] = useState({ cowId: '', milkAmount: '' })
   const [editingRecord, setEditingRecord] = useState(null)
   const [errors, setErrors] = useState({})
   const [successMessage, setSuccessMessage] = useState('')
-  const [historyFilters, setHistoryFilters] = useState({
-    selectedDate: getTodayThailand(),
-    searchTerm: ''
-  })
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [selectedHistoryDate, setSelectedHistoryDate] = useState(getTodayThailand())
   const [showBackdateModal, setShowBackdateModal] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [showFloatingMenu, setShowFloatingMenu] = useState(false)
+  const [showCalendarModal, setShowCalendarModal] = useState(false)
 
   // Hooks
-  const { farms, loading: farmsLoading } = useFarms()
-  const { cows } = useCows(selectedFarmId)
-  const { records, sessions, loading: recordsLoading, error: recordsError, createRecord, updateRecord, deleteRecord, getRecordsBySession } = useMilkRecords(selectedFarmId, historyFilters.selectedDate)
+  const { cows } = useCows()
+  const { records, sessions, loading: recordsLoading, error: recordsError, createRecord, updateRecord, deleteRecord, getRecordsBySession } = useMilkRecords(getTodayThailand())
 
-  // Set default farm when farms load
-  useEffect(() => {
-    if (farms.length > 0 && !selectedFarmId) {
-      setSelectedFarmId(farms[0]._id)
-    }
-  }, [farms, selectedFarmId])
 
   // Handle create record
   const handleCreateRecord = async (e) => {
@@ -49,10 +40,6 @@ export default function MilkPage() {
 
     try {
       // Validation
-      if (!selectedFarmId) {
-        setErrors({ submit: 'กรุณาเลือกฟาร์มก่อน' })
-        return
-      }
 
       if (!newRecord.cowId) {
         setErrors({ cowId: 'กรุณาเลือกโค' })
@@ -149,6 +136,13 @@ export default function MilkPage() {
   const eveningTotal = getRecordsBySession('evening').reduce((sum, record) => sum + record.milkAmount, 0)
 
 
+  // Handle date selection from calendar
+  const handleDateSelect = (dateString) => {
+    setSelectedHistoryDate(dateString)
+    setShowHistoryModal(true)
+    setShowCalendarModal(false)
+  }
+
   // Handle opening backdate modal
   const handleOpenBackdateModal = () => {
     setShowBackdateModal(true)
@@ -157,7 +151,8 @@ export default function MilkPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <AuthGuard>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Modern Glass Header */}
       {/* <header className="bg-white/80 backdrop-blur-xl border-b-0 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sticky top-0" style={{ zIndex: 9999 }}>
         <div className="px-4 sm:px-6 lg:px-8">
@@ -185,79 +180,31 @@ export default function MilkPage() {
         </div>
       </header> */}
 
-      {/* Modern Glass Tab Navigation */}
-      <div className="bg-white/90 backdrop-blur-xl border-b border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.1)] sticky top-0" style={{ zIndex: 9998 }}>
-        <div className="px-4 py-3">
-          <div className="flex relative">
-            <button
-              onClick={() => setActiveTab('record')}
-              className={`flex-1 flex items-center justify-center space-x-3 py-3 text-xl font-light transition-all duration-300 relative ${
-                activeTab === 'record'
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <Droplets size={18} />
-              <span>รีดนมวันนี้</span>
-              {activeTab === 'record' && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 flex items-center justify-center space-x-3 py-3 text-xl font-light transition-all duration-300 relative ${
-                activeTab === 'history'
-                  ? 'text-gray-900'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              <History size={18} />
-              <span>ประวัติ</span>
-              {activeTab === 'history' && (
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full shadow-sm"></div>
-              )}
-            </button>
-          </div>
-        </div>
-      </div>
 
 
       {/* Main Content */}
-      <div className="p-4 pb-20 md:pb-4" style={{ position: 'relative', zIndex: 5 }}>
+      <div className="p-4 pb-20 md:pb-4">
         <div className="max-w-2xl mx-auto">
-          {activeTab === 'record' ? (
-            <MilkRecordTab
-              selectedFarmId={selectedFarmId}
-              selectedSession={selectedSession}
-              cows={cows}
-              availableCows={availableCows}
-              editingRecord={editingRecord}
-              setEditingRecord={setEditingRecord}
-              errors={errors}
-              recordsError={recordsError}
-              recordsLoading={recordsLoading}
-              sessionRecords={sessionRecords}
-              records={records}
-              handleEditRecord={handleEditRecord}
-              handleUpdateRecord={handleUpdateRecord}
-              handleDeleteRecord={handleDeleteRecord}
-            />
-          ) : (
-            <MilkHistoryTab
-              records={records}
-              cows={cows}
-              loading={recordsLoading}
-              updateRecord={updateRecord}
-              deleteRecord={deleteRecord}
-              historyFilters={historyFilters}
-            />
-          )}
+          <MilkRecordTab
+            selectedSession={selectedSession}
+            cows={cows}
+            availableCows={availableCows}
+            editingRecord={editingRecord}
+            setEditingRecord={setEditingRecord}
+            errors={errors}
+            recordsError={recordsError}
+            recordsLoading={recordsLoading}
+            sessionRecords={sessionRecords}
+            records={records}
+            handleEditRecord={handleEditRecord}
+            handleUpdateRecord={handleUpdateRecord}
+            handleDeleteRecord={handleDeleteRecord}
+          />
         </div>
       </div>
 
       {/* Modern Glass Quick Add Form - Fixed Bottom */}
-      {activeTab === 'record' && selectedFarmId && (
-        <div className="fixed bottom-20 left-0 right-0 bg-white/90 backdrop-blur-xl border-t-0 shadow-[0_-8px_32px_rgba(0,0,0,0.12)] z-10">
+        <div className="fixed bottom-16 left-0 right-0 bg-white/90 backdrop-blur-xl border-t-0 shadow-[0_-8px_32px_rgba(0,0,0,0.12)] z-10">
           <div className="p-4 max-w-2xl mx-auto">
             {/* Modern Session Toggle */}
             <div className="flex bg-gray-100/60 rounded-2xl p-0.5 mb-2 backdrop-blur-sm">
@@ -275,11 +222,11 @@ export default function MilkPage() {
                 >
                   รอบเช้า
                 </Button>
-                {morningTotal > 0 && (
+                {/* {morningTotal > 0 && (
                   <div className="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[28px] text-center shadow-lg z-20">
                     {morningTotal.toFixed(2)}
                   </div>
-                )}
+                )} */}
               </div>
               <div className="flex-1 relative">
                 <Button
@@ -295,11 +242,11 @@ export default function MilkPage() {
                 >
                   รอบเย็น
                 </Button>
-                {eveningTotal > 0 && (
+                {/* {eveningTotal > 0 && (
                   <div className="absolute -top-1 -right-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold px-2 py-1 rounded-full min-w-[28px] text-center shadow-lg z-20">
                     {eveningTotal.toFixed(2)}
                   </div>
-                )}
+                )} */}
               </div>
             </div>
 
@@ -307,7 +254,7 @@ export default function MilkPage() {
             {!isSessionComplete() && (
               <div className="bg-white/90 backdrop-blur-xl p-2">
                 <form onSubmit={handleCreateRecord} className="flex flex-col space-y-3">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     <select
                       value={newRecord.cowId}
                       onChange={(e) => setNewRecord(prev => ({ ...prev, cowId: e.target.value }))}
@@ -329,7 +276,7 @@ export default function MilkPage() {
                       step="0.01"
                       min="0.01"
                       max="100"
-                      placeholder="ปริมาณนม (กก.)"
+                      placeholder="น้ำนม (กก.)"
                       value={newRecord.milkAmount}
                       onChange={(e) => setNewRecord(prev => ({ ...prev, milkAmount: e.target.value }))}
                       className={`bg-white/80 backdrop-blur-sm border border-gray-200/50 rounded-xl px-3 py-3 text-right text-lg font-light shadow-md focus:ring-2 focus:ring-blue-500/50 focus:bg-white focus:border-blue-300/50 h-12 transition-all duration-200 ${
@@ -337,24 +284,25 @@ export default function MilkPage() {
                       }`}
                       disabled={recordsLoading || submitting}
                     />
-                  </div>
+                  
 
                   <Button
                     type="submit"
                     variant="primary"
                     size="md"
-                    disabled={recordsLoading || submitting || !selectedFarmId}
+                    disabled={recordsLoading || submitting}
                     loading={submitting}
-                    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border-0 font-bold h-12 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
+                    className=" bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 border-0 font-bold h-12 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200"
                   >
                     บันทึก
                   </Button>
+                  </div>
                 </form>
               </div>
             )}
 
             {/* Modern Completion Message */}
-            {isSessionComplete() && (
+            {/* {isSessionComplete() && (
               <div className="bg-green-50/60 backdrop-blur-sm border-0 text-green-700 px-4 py-3 rounded-xl text-center shadow-sm">
                 <div className="flex items-center justify-center space-x-1.5">
                   <svg className="w-4 h-4 stroke-1" fill="currentColor" viewBox="0 0 20 20">
@@ -365,7 +313,7 @@ export default function MilkPage() {
                   </span>
                 </div>
               </div>
-            )}
+            )} */}
 
             {/* Error Messages */}
             {(errors.cowId || errors.milkAmount || errors.submit) && (
@@ -375,38 +323,105 @@ export default function MilkPage() {
             )}
           </div>
         </div>
+
+      {/* Edge Slide Menu */}
+      <div className={`fixed right-0 top-1/2 transform -translate-y-1/2 z-30 transition-all duration-300 ${
+        showFloatingMenu ? 'translate-x-0' : 'translate-x-full'
+      }`}>
+        {/* Menu Panel */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-l-3xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-200/50">
+          <div className="p-4 space-y-4">
+            {/* Calendar History */}
+            <button
+              onClick={() => {
+                setShowCalendarModal(true)
+                setShowFloatingMenu(false)
+              }}
+              className="w-14 h-14 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-105"
+            >
+              <Calendar size={24} />
+            </button>
+
+            {/* Backdate */}
+            <button
+              onClick={() => {
+                setShowBackdateModal(true)
+                setShowFloatingMenu(false)
+              }}
+              className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-105"
+            >
+              <Clock size={24} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Arrow Tab Button */}
+      {!showFloatingMenu && (
+        <button
+          onClick={() => setShowFloatingMenu(true)}
+          className="fixed right-0 top-1/2 transform -translate-y-1/2 translate-x-2 z-40 bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transition-all duration-300 flex items-center justify-center rounded-l-xl px-4 py-8"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9,18 15,12 9,6"></polyline>
+          </svg>
+        </button>
       )}
 
-      {/* History Filter Form - Fixed Bottom */}
-      {activeTab === 'history' && (
-        <div className="fixed bottom-20 left-4 right-4 bg-white/90 backdrop-blur-xl border-t border-white/20 shadow-[0_-8px_32px_rgba(0,0,0,0.1)] z-10 rounded-t-3xl">
-          <div className="px-4 py-4">
-            <div className="flex items-center space-x-3">
-              <input
-                type="date"
-                max={getTodayThailand()}
-                value={historyFilters.selectedDate}
-                onChange={(e) => setHistoryFilters(prev => ({ ...prev, selectedDate: e.target.value, searchTerm: '' }))}
-                className="flex-none w-40 border border-gray-200 bg-white rounded-xl px-4 py-3 text-lg font-light shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 focus:outline-none transition-all duration-300"
-              />
+      {/* Backdrop to close floating menu */}
+      {showFloatingMenu && (
+        <div
+          className="fixed inset-0 z-20"
+          onClick={() => setShowFloatingMenu(false)}
+        />
+      )}
 
-              <input
-                type="text"
-                placeholder="ค้นหาชื่อโค"
-                value={historyFilters.searchTerm}
-                onChange={(e) => setHistoryFilters(prev => ({ ...prev, searchTerm: e.target.value }))}
-                className="flex-1 min-w-0 border border-gray-200 bg-white rounded-xl px-4 py-3 text-lg font-light shadow-sm focus:ring-2 focus:ring-blue-300 focus:border-blue-400 focus:outline-none transition-all duration-300"
-              />
+      {/* Calendar Modal */}
+      {showCalendarModal && (
+        <div className="fixed inset-0 z-[99999]">
+          {/* Background overlay */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300"
+            onClick={() => setShowCalendarModal(false)}
+          ></div>
+
+          {/* Modal panel */}
+          <div className="fixed inset-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-200/50 overflow-hidden">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">ประวัติการรีดนม</h2>
+                <button
+                  onClick={() => setShowCalendarModal(false)}
+                  className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Calendar */}
+              <div className="h-[calc(100%-80px)] overflow-y-auto">
+                <CalendarView onDateSelect={handleDateSelect} />
+              </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Milk History Modal */}
+      <MilkHistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        selectedDate={selectedHistoryDate}
+      />
+
       {/* Backdate Modal Component */}
       <BackdateModal
         showBackdateModal={showBackdateModal}
         setShowBackdateModal={setShowBackdateModal}
-        selectedFarmId={selectedFarmId}
         cows={cows}
       />
 
@@ -424,7 +439,8 @@ export default function MilkPage() {
         </div>
       )}
 
-      <BottomNavigation />
-    </div>
+        <BottomNavigation />
+      </div>
+    </AuthGuard>
   )
 }

@@ -6,6 +6,7 @@ import { ArrowLeft, Edit3, Trash2, Loader2 } from 'lucide-react'
 import Avatar from '../../../components/Avatar'
 import BottomNavigation from '../../../components/BottomNavigation'
 import Button from '../../../components/Button'
+import AuthGuard from '../../../components/AuthGuard'
 
 export default function CowDetailPage() {
   const params = useParams()
@@ -205,7 +206,8 @@ export default function CowDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <AuthGuard>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Modern Glass Header */}
       <header className="bg-white/80 backdrop-blur-xl border-b-0 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sticky top-0 z-40">
         <div className="px-4 sm:px-6 lg:px-8">
@@ -403,7 +405,8 @@ export default function CowDetailPage() {
         </div>
       </div>
 
-      <BottomNavigation />
-    </div>
+        <BottomNavigation />
+      </div>
+    </AuthGuard>
   )
 }

@@ -5,22 +5,27 @@ import MilkRecord from '../../../../models/MilkRecord'
 
 export async function GET(request) {
   try {
+    // Get farmId from session cookie instead of query params
+    const session = request.cookies.get('session')
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
+    }
+
+    const sessionData = JSON.parse(session.value)
+    const farmId = sessionData.farmId
+
+    if (!farmId) {
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
+    }
+
     const { searchParams } = new URL(request.url)
-    const farmId = searchParams.get('farmId')
     const year = parseInt(searchParams.get('year'))
     const month = parseInt(searchParams.get('month'))
 
-    if (!farmId || !year || !month) {
+    if (!year || !month) {
       return NextResponse.json({
         success: false,
-        error: 'Missing required parameters: farmId, year, month'
-      }, { status: 400 })
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(farmId)) {
-      return NextResponse.json({
-        success: false,
-        error: 'Invalid farmId format'
+        error: 'Missing required parameters: year, month'
       }, { status: 400 })
     }
 

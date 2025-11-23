@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import dbConnect from '../../../../lib/mongodb'
-import { Farm } from '../../../../models'
+import { Farm, User } from '../../../../models'
 import { getNowThailand } from '../../../../lib/datetime'
 
 // GET /api/farms/[id] - Get farm by ID
@@ -88,7 +88,7 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE /api/farms/[id] - Soft delete farm
+// DELETE /api/farms/[id] - Delete farm and its users
 export async function DELETE(request, { params }) {
   try {
     await dbConnect()
@@ -104,20 +104,15 @@ export async function DELETE(request, { params }) {
       )
     }
 
-    // Soft delete (set isActive to false)
-    const updatedFarm = await Farm.findByIdAndUpdate(
-      id,
-      {
-        isActive: false,
-        updatedAt: getNowThailand()
-      },
-      { new: true }
-    )
+    // Delete all users associated with this farm
+    await User.deleteMany({ farmId: id })
+
+    // Delete the farm
+    await Farm.findByIdAndDelete(id)
 
     return NextResponse.json({
       success: true,
-      message: 'Farm deleted successfully',
-      data: updatedFarm
+      message: 'Farm and associated users deleted successfully'
     })
 
   } catch (error) {

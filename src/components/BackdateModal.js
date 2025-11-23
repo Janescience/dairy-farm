@@ -6,7 +6,6 @@ import Button from './Button'
 export default function BackdateModal({
   showBackdateModal,
   setShowBackdateModal,
-  selectedFarmId,
   cows
 }) {
   const [backdateData, setBackdateData] = useState({ date: '', records: [] })
@@ -51,7 +50,7 @@ export default function BackdateModal({
 
     try {
       // ดึงข้อมูลที่บันทึกไปแล้วในวันที่เลือก
-      const response = await fetch(`/api/milk-records?farmId=${selectedFarmId}&date=${newDate}`)
+      const response = await fetch(`/api/milk-records?date=${newDate}`)
       const result = await response.json()
 
       if (result.success) {
@@ -197,7 +196,6 @@ export default function BackdateModal({
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            farmId: selectedFarmId,
             date: backdateData.date,
             records: bulkRecords
           }),

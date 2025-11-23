@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import dbConnect from '../../../lib/mongodb'
-import { Farm } from '../../../models'
+import { Farm, User } from '../../../models'
 import { getNowThailand } from '../../../lib/datetime'
 
 // GET /api/farms - Get all farms
@@ -51,9 +51,35 @@ export async function POST(request) {
       updatedAt: getNowThailand()
     })
 
+    // Create owner and employee users for this farm
+    const farmName = name.trim()
+    const users = await User.insertMany([
+      {
+        username: `${farmName}-owner`,
+        password: '123456',
+        farmId: farm._id,
+        role: 'owner',
+        isActive: true,
+        createdAt: getNowThailand(),
+        updatedAt: getNowThailand()
+      },
+      {
+        username: `${farmName}-employee`,
+        password: '123456',
+        farmId: farm._id,
+        role: 'employee',
+        isActive: true,
+        createdAt: getNowThailand(),
+        updatedAt: getNowThailand()
+      }
+    ])
+
     return NextResponse.json({
       success: true,
-      data: farm
+      data: {
+        farm,
+        users: users.map(u => ({ username: u.username, role: u.role }))
+      }
     }, { status: 201 })
 
   } catch (error) {

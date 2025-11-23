@@ -13,14 +13,15 @@ import BottomNavigation from '../components/BottomNavigation'
 import MilkChart from '../components/MilkChart'
 import MonthlyChart from '../components/MonthlyChart'
 import YearlyChart from '../components/YearlyChart'
+import AuthGuard from '../components/AuthGuard'
 
 export default function Home() {
   const { farms } = useFarms()
   const farmId = farms?.[0]?._id
-  const { summary, loading: summaryLoading } = useDailySummary(farmId)
-  const { chartData, loading: chartLoading, error: chartError } = useChartData(farmId)
-  const { chartData: monthlyData, loading: monthlyLoading, error: monthlyError } = useMonthlyChartData(farmId)
-  const { chartData: yearlyData, loading: yearlyLoading, error: yearlyError } = useYearlyChartData(farmId)
+  const { summary, loading: summaryLoading } = useDailySummary()
+  const { chartData, loading: chartLoading, error: chartError } = useChartData()
+  const { chartData: monthlyData, loading: monthlyLoading, error: monthlyError } = useMonthlyChartData()
+  const { chartData: yearlyData, loading: yearlyLoading, error: yearlyError } = useYearlyChartData()
 
   // Component สำหรับแสดงการเปรียบเทียบ
   const DiffIndicator = ({ diff, showNumber = true }) => {
@@ -49,9 +50,10 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-      <div className="p-4 pb-28">
-        <div className="w-full max-w-md mx-auto">
+    <AuthGuard>
+      <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+          <div className="p-4 pb-28">
+            <div className="w-full max-w-md mx-auto">
 
         {/* Modern Glass Daily Summary */}
         {summaryLoading ? (
@@ -144,9 +146,7 @@ export default function Home() {
                     {summary.topProducers.map((cow, index) => (
                       <div key={cow.name} className="flex items-center justify-between p-3 bg-white/60 backdrop-blur-sm rounded-xl hover:bg-white/80 transition-all duration-300 shadow-sm">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-md">
-                            <span className="text-sm font-bold text-white">#{index + 1}</span>
-                          </div>
+                          
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-purple-100 rounded-xl flex items-center justify-center shadow-sm">
                             <Avatar username={cow.name} size={28} className="rounded-lg" />
                           </div>
@@ -154,7 +154,7 @@ export default function Home() {
                             <span className="font-semibold text-gray-900 text-base">{cow.name}</span>
                             <div className="flex items-center space-x-1 mt-0.5">
                               <span className="text-sm text-gray-500 font-medium">ผลิต</span>
-                              <span className="font-bold text-gray-900 text-sm">{cow.total.toFixed(2)} กก.</span>
+                              <span className="font-bold text-gray-900 ">{cow.total.toFixed(2)} กก.</span>
                             </div>
                           </div>
                         </div>
@@ -193,9 +193,9 @@ export default function Home() {
         </div>
 
         </div>
+        <BottomNavigation />
       </div>
-
-      <BottomNavigation />
-    </main>
+      </main>
+    </AuthGuard>
   )
 }

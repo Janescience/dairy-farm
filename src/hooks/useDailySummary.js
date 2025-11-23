@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getTodayThailand, getYesterdayThailand } from '../lib/datetime'
 
-export function useDailySummary(farmId, selectedDate = null) {
+export function useDailySummary(selectedDate = null) {
   const [summary, setSummary] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -9,8 +9,6 @@ export function useDailySummary(farmId, selectedDate = null) {
   const date = selectedDate || getTodayThailand()
 
   const fetchDailySummary = async () => {
-    if (!farmId) return
-
     setLoading(true)
     setError(null)
 
@@ -19,9 +17,9 @@ export function useDailySummary(farmId, selectedDate = null) {
 
       // Fetch both today's and yesterday's data
       const [sessionsRes, recordsRes, yesterdayRecordsRes] = await Promise.all([
-        fetch(`/api/sessions?farmId=${farmId}&date=${date}`),
-        fetch(`/api/milk-records?farmId=${farmId}&date=${date}`),
-        fetch(`/api/milk-records?farmId=${farmId}&date=${yesterday}`)
+        fetch(`/api/sessions?date=${date}`),
+        fetch(`/api/milk-records?date=${date}`),
+        fetch(`/api/milk-records?date=${yesterday}`)
       ])
 
       const [sessionsResult, recordsResult, yesterdayRecordsResult] = await Promise.all([
@@ -135,10 +133,8 @@ export function useDailySummary(farmId, selectedDate = null) {
   }
 
   useEffect(() => {
-    if (farmId) {
-      fetchDailySummary()
-    }
-  }, [farmId, date])
+    fetchDailySummary()
+  }, [date])
 
   return {
     summary,

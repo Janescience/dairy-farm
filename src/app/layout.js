@@ -1,4 +1,5 @@
 import './globals.css'
+import { AuthProvider } from '../contexts/AuthContext'
 
 export const metadata = {
   title: 'Dairy Farm',
@@ -20,7 +21,9 @@ export default function RootLayout({ children }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body className="bg-white text-black">
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )

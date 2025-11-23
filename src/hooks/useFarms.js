@@ -1,30 +1,28 @@
 import { useState, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
 
 export function useFarms() {
   const [farms, setFarms] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { user } = useAuth()
 
   // Fetch farms
   const fetchFarms = async () => {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch('/api/farms')
-      const result = await response.json()
-
-      if (result.success) {
-        setFarms(result.data)
-      } else {
-        setError(result.error || 'Failed to fetch farms')
+    if (user?.farmId) {
+      // Use farm data from auth context only
+      const userFarm = {
+        _id: user.farmId,
+        name: user.farmName
       }
-    } catch (err) {
-      setError('Network error')
-      console.error('Error fetching farms:', err)
-    } finally {
+      setFarms([userFarm])
       setLoading(false)
+      return
     }
+
+    // If no user session, set empty farms
+    setFarms([])
+    setLoading(false)
   }
 
   // Create farm
@@ -62,7 +60,7 @@ export function useFarms() {
 
   useEffect(() => {
     fetchFarms()
-  }, [])
+  }, [user])
 
   return {
     farms,

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getTodayThailand } from '../lib/datetime'
 
-export function useMilkRecords(farmId, selectedDate = null) {
+export function useMilkRecords(selectedDate = null) {
   const [records, setRecords] = useState([])
   const [sessions, setSessions] = useState({ morning: null, evening: null })
   const [loading, setLoading] = useState(false)
@@ -11,10 +11,8 @@ export function useMilkRecords(farmId, selectedDate = null) {
 
   // Fetch sessions
   const fetchSessions = async () => {
-    if (!farmId) return
-
     try {
-      const response = await fetch(`/api/sessions?farmId=${farmId}&date=${date}`)
+      const response = await fetch(`/api/sessions?date=${date}`)
       const result = await response.json()
 
       if (result.success) {
@@ -27,15 +25,13 @@ export function useMilkRecords(farmId, selectedDate = null) {
 
   // Fetch milk records
   const fetchRecords = async (session = null) => {
-    if (!farmId) return
-
     setLoading(true)
     setError(null)
 
     try {
       const url = session
-        ? `/api/milk-records?farmId=${farmId}&date=${date}&session=${session}`
-        : `/api/milk-records?farmId=${farmId}&date=${date}`
+        ? `/api/milk-records?date=${date}&session=${session}`
+        : `/api/milk-records?date=${date}`
 
       const response = await fetch(url)
       const result = await response.json()
@@ -65,7 +61,6 @@ export function useMilkRecords(farmId, selectedDate = null) {
         },
         body: JSON.stringify({
           ...recordData,
-          farmId,
           date: recordData.date || date
         })
       })
@@ -162,11 +157,9 @@ export function useMilkRecords(farmId, selectedDate = null) {
   }
 
   useEffect(() => {
-    if (farmId) {
-      fetchSessions()
-      fetchRecords()
-    }
-  }, [farmId, date])
+    fetchSessions()
+    fetchRecords()
+  }, [date])
 
   return {
     records,

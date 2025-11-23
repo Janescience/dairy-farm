@@ -8,14 +8,27 @@ export async function POST(request) {
   try {
     await dbConnect()
 
+    // Get farmId from session cookie instead of request body
+    const sessionCookie = request.cookies.get('session')
+    if (!sessionCookie) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
+    }
+
+    const sessionData = JSON.parse(sessionCookie.value)
+    const farmId = sessionData.farmId
+
+    if (!farmId) {
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
+    }
+
     const body = await request.json()
-    const { farmId, date: providedDate, records } = body
+    const { date: providedDate, records } = body
     const date = providedDate || getTodayThailand()
 
     // Validation
-    if (!farmId || !records || !Array.isArray(records) || records.length === 0) {
+    if (!records || !Array.isArray(records) || records.length === 0) {
       return NextResponse.json(
-        { error: 'farmId and records array are required' },
+        { error: 'records array is required' },
         { status: 400 }
       )
     }

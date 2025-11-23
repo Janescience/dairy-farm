@@ -1,6 +1,8 @@
 import { Loader2, TrendingUp, AlertTriangle, BarChart3 } from 'lucide-react'
 
 export default function MilkChart({ chartData, loading, error }) {
+  console.log('MilkChart rendering with chartData:', chartData)
+
   if (loading) {
     return (
       <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.08)] border-0 p-6">

@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react'
 
-export function useCows(farmId) {
+export function useCows() {
   const [cows, setCows] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
 
   // Fetch cows
   const fetchCows = async () => {
-    if (!farmId) return
-
     setLoading(true)
     setError(null)
 
     try {
-      const response = await fetch(`/api/cows?farmId=${farmId}`)
+      const response = await fetch('/api/cows')
       const result = await response.json()
 
       if (result.success) {
@@ -31,12 +29,12 @@ export function useCows(farmId) {
 
   // Create cow
   const createCow = async (cowData) => {
-    console.log('useCows createCow called:', { cowData, farmId })
+    console.log('useCows createCow called:', { cowData })
     setLoading(true)
     setError(null)
 
     try {
-      const payload = { ...cowData, farmId }
+      const payload = cowData
       console.log('API payload:', payload)
 
       const response = await fetch('/api/cows', {
@@ -134,7 +132,7 @@ export function useCows(farmId) {
 
   useEffect(() => {
     fetchCows()
-  }, [farmId])
+  }, [])
 
   return {
     cows,

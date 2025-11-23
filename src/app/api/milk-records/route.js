@@ -8,27 +8,33 @@ export async function GET(request) {
   try {
     await dbConnect()
 
-    const { searchParams } = new URL(request.url)
-    const farmId = searchParams.get('farmId')
-    const date = searchParams.get('date') || getTodayThailand()
-    const session = searchParams.get('session')
-
-    if (!farmId) {
-      return NextResponse.json(
-        { error: 'farmId is required' },
-        { status: 400 }
-      )
+    // Get farmId from session cookie instead of query params
+    const session = request.cookies.get('session')
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
     }
 
+    const sessionData = JSON.parse(session.value)
+    const farmId = sessionData.farmId
+
+    if (!farmId) {
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const date = searchParams.get('date') || getTodayThailand()
+    const sessionType = searchParams.get('session')
+
     const query = { farmId, date }
-    if (session) {
-      query.session = session
+    if (sessionType) {
+      query.session = sessionType
     }
 
     const records = await MilkRecord.find(query)
       .populate('cowId', 'name age')
       .sort({ createdAt: 1 })
       .lean()
+
 
     return NextResponse.json({
       success: true,
@@ -49,14 +55,27 @@ export async function POST(request) {
   try {
     await dbConnect()
 
+    // Get farmId from session cookie instead of request body
+    const sessionCookie = request.cookies.get('session')
+    if (!sessionCookie) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
+    }
+
+    const sessionData = JSON.parse(sessionCookie.value)
+    const farmId = sessionData.farmId
+
+    if (!farmId) {
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
+    }
+
     const body = await request.json()
-    const { farmId, sessionId, cowId, session, milkAmount, date: providedDate } = body
+    const { sessionId, cowId, session, milkAmount, date: providedDate } = body
     const date = providedDate || getTodayThailand()
 
     // Validation
-    if (!farmId || !cowId || !session || milkAmount === undefined) {
+    if (!cowId || !session || milkAmount === undefined) {
       return NextResponse.json(
-        { error: 'farmId, cowId, session, and milkAmount are required' },
+        { error: 'cowId, session, and milkAmount are required' },
         { status: 400 }
       )
     }

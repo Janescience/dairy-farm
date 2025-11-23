@@ -8,16 +8,21 @@ export async function GET(request) {
   try {
     await dbConnect()
 
-    const { searchParams } = new URL(request.url)
-    const farmId = searchParams.get('farmId')
-    const date = searchParams.get('date') || getTodayThailand()
+    // Get farmId from session cookie instead of query params
+    const session = request.cookies.get('session')
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
+    }
+
+    const sessionData = JSON.parse(session.value)
+    const farmId = sessionData.farmId
 
     if (!farmId) {
-      return NextResponse.json(
-        { error: 'farmId is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
     }
+
+    const { searchParams } = new URL(request.url)
+    const date = searchParams.get('date') || getTodayThailand()
 
     // Get or create sessions for today
     const sessions = await Promise.all([

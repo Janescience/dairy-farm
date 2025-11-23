@@ -8,14 +8,17 @@ export async function GET(request) {
   try {
     await dbConnect()
 
-    const { searchParams } = new URL(request.url)
-    const farmId = searchParams.get('farmId')
+    // Get farmId from session cookie instead of query params
+    const session = request.cookies.get('session')
+    if (!session) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
+    }
+
+    const sessionData = JSON.parse(session.value)
+    const farmId = sessionData.farmId
 
     if (!farmId) {
-      return NextResponse.json(
-        { error: 'farmId is required' },
-        { status: 400 }
-      )
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
     }
 
     const cows = await Cow.find({ farmId, isActive: true })
@@ -41,13 +44,26 @@ export async function POST(request) {
   try {
     await dbConnect()
 
+    // Get farmId from session cookie instead of request body
+    const sessionCookie = request.cookies.get('session')
+    if (!sessionCookie) {
+      return NextResponse.json({ success: false, error: 'No active session' }, { status: 401 })
+    }
+
+    const sessionData = JSON.parse(sessionCookie.value)
+    const farmId = sessionData.farmId
+
+    if (!farmId) {
+      return NextResponse.json({ success: false, error: 'ไม่พบ farmId ใน session' }, { status: 400 })
+    }
+
     const body = await request.json()
-    const { farmId, name, age } = body
+    const { name, age } = body
 
     // Validation
-    if (!farmId || !name) {
+    if (!name) {
       return NextResponse.json(
-        { error: 'farmId and name are required' },
+        { error: 'name is required' },
         { status: 400 }
       )
     }
