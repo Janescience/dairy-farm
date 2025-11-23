@@ -104,16 +104,13 @@ export default function CalendarView({ onDateSelect }) {
     const monthKey = `${year}-${month}`
     const currentMonthData = monthlyData[monthKey] || {}
     const dayData = currentMonthData[dateKey]
+    const hasData = dayData && dayData.total > 0
 
-    // Only open modal if the date has data
-    if (dayData && dayData.total > 0) {
-      setSelectedDate(date)
-      if (onDateSelect) {
-        onDateSelect(dateKey)
-      }
-    } else {
-      // Just select the date without opening modal if no data
-      setSelectedDate(date)
+    setSelectedDate(date)
+
+    if (onDateSelect) {
+      // Pass both dateKey and hasData to parent
+      onDateSelect(dateKey, hasData)
     }
   }
 

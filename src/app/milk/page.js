@@ -137,10 +137,17 @@ export default function MilkPage() {
 
 
   // Handle date selection from calendar
-  const handleDateSelect = (dateString) => {
+  const handleDateSelect = (dateString, hasData = true) => {
     setSelectedHistoryDate(dateString)
-    setShowHistoryModal(true)
     setShowCalendarModal(false)
+
+    if (hasData) {
+      // If date has data, show history modal
+      setShowHistoryModal(true)
+    } else {
+      // If date has no data, show backdate modal
+      setShowBackdateModal(true)
+    }
   }
 
   // Handle opening backdate modal
@@ -342,16 +349,7 @@ export default function MilkPage() {
               <Calendar size={24} />
             </button>
 
-            {/* Backdate */}
-            <button
-              onClick={() => {
-                setShowBackdateModal(true)
-                setShowFloatingMenu(false)
-              }}
-              className="w-14 h-14 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-105"
-            >
-              <Clock size={24} />
-            </button>
+          
           </div>
         </div>
       </div>
@@ -385,25 +383,25 @@ export default function MilkPage() {
             onClick={() => setShowCalendarModal(false)}
           ></div>
 
-          {/* Modal panel */}
-          <div className="fixed inset-4 bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,0,0,0.12)] border border-gray-200/50 overflow-hidden">
-            <div className="p-6">
+          {/* Modal panel - Full screen */}
+          <div className="fixed inset-0 bg-white flex flex-col">
+            <div className="flex-1 flex flex-col">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between p-4 bg-white border-b border-gray-200">
                 <h2 className="text-xl font-semibold text-gray-900">ประวัติการรีดนม</h2>
                 <button
                   onClick={() => setShowCalendarModal(false)}
-                  className="w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
+                  className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
                 </button>
               </div>
 
-              {/* Calendar */}
-              <div className="h-[calc(100%-80px)] overflow-y-auto">
+              {/* Calendar - Full height */}
+              <div className="flex-1 overflow-y-auto">
                 <CalendarView onDateSelect={handleDateSelect} />
               </div>
             </div>
@@ -423,6 +421,11 @@ export default function MilkPage() {
         showBackdateModal={showBackdateModal}
         setShowBackdateModal={setShowBackdateModal}
         cows={cows}
+        preSelectedDate={selectedHistoryDate}
+        onBack={() => {
+          setShowBackdateModal(false)
+          setShowCalendarModal(true)
+        }}
       />
 
 
