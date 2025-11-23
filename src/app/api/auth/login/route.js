@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import dbConnect from '../../../../lib/mongodb'
 import { User } from '../../../../models'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request) {
   try {
     await dbConnect()
@@ -52,12 +54,12 @@ export async function POST(request) {
       data: sessionData
     })
 
-    // Set session cookie (persistent until logout)
+    // Set session cookie (never expires until manual logout)
     response.cookies.set('session', JSON.stringify(sessionData), {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax'
-      // No maxAge = persistent session until browser closes or explicit logout
+      sameSite: 'lax',
+      maxAge: 365 * 24 * 60 * 60 * 10 // 10 years (effectively never expires)
     })
 
     return response
