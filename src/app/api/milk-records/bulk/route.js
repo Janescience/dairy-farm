@@ -3,6 +3,8 @@ import dbConnect from '../../../../lib/mongodb'
 import { MilkRecord, DailySession, DailySummary } from '../../../../models'
 import { getTodayThailand, getNowThailand } from '../../../../lib/datetime'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/milk-records/bulk - Create multiple milk records
 export async function POST(request) {
   try {

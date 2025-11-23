@@ -3,6 +3,8 @@ import mongoose from 'mongoose'
 import dbConnect from '../../../../lib/mongodb'
 import MilkRecord from '../../../../models/MilkRecord'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request) {
   try {
     // Get farmId from session cookie instead of query params

@@ -3,6 +3,8 @@ import dbConnect from '../../../lib/mongodb'
 import { DailySession } from '../../../models'
 import { getTodayThailand, getNowThailand } from '../../../lib/datetime'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/sessions - Get or create today's sessions
 export async function GET(request) {
   try {

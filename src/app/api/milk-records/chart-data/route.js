@@ -3,6 +3,8 @@ import MilkRecord from '../../../../models/MilkRecord'
 import { getTodayThailand } from '../../../../lib/datetime'
 import mongoose from 'mongoose'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request) {
   try {
     await dbConnect()

@@ -2,6 +2,8 @@ import dbConnect from '../../../../lib/mongodb'
 import MilkRecord from '../../../../models/MilkRecord'
 import mongoose from 'mongoose'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request) {
   try {
     await dbConnect()

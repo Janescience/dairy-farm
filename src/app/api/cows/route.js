@@ -3,6 +3,8 @@ import dbConnect from '../../../lib/mongodb'
 import { Cow } from '../../../models'
 import { getNowThailand } from '../../../lib/datetime'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/cows - Get all cows
 export async function GET(request) {
   try {
